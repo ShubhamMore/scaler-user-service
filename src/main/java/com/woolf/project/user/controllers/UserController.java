@@ -4,6 +4,7 @@ import com.woolf.project.user.dtos.LoginRequestDTO;
 import com.woolf.project.user.dtos.LoginResponseDTO;
 import com.woolf.project.user.dtos.SignUpRequestDTO;
 import com.woolf.project.user.dtos.UserDTO;
+import com.woolf.project.user.exception.PasswordInvalidException;
 import com.woolf.project.user.exception.UserAlreadyExistException;
 import com.woolf.project.user.models.Token;
 import com.woolf.project.user.models.User;
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDTO> signup(@RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException {
+    public ResponseEntity<UserDTO> signup(@RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException,PasswordInvalidException {
         User user = userService.createUser(requestDTO.getEmail(),
                 requestDTO.getPassword(), requestDTO.getName(), requestDTO.getStreet(), requestDTO.getCity(),
                 requestDTO.getState(), requestDTO.getZipcode(), requestDTO.getCountry());

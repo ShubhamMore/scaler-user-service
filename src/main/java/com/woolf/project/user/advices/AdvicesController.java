@@ -1,6 +1,7 @@
 package com.woolf.project.user.advices;
 
 import com.woolf.project.user.dtos.ExceptionDTO;
+import com.woolf.project.user.exception.PasswordInvalidException;
 import com.woolf.project.user.exception.UserAlreadyExistException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,4 +35,11 @@ public class AdvicesController {
         return new ResponseEntity<>(new ExceptionDTO(HttpStatus.NOT_FOUND, ex.getMessage()),
                 HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(PasswordInvalidException.class)
+    ResponseEntity<ExceptionDTO> handleInvalidPasswordException(PasswordInvalidException ex){
+        return new ResponseEntity<>(new ExceptionDTO(HttpStatus.BAD_REQUEST, ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
 }
