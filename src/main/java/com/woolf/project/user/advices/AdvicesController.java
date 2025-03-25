@@ -3,6 +3,7 @@ package com.woolf.project.user.advices;
 import com.woolf.project.user.dtos.ExceptionDTO;
 import com.woolf.project.user.exception.PasswordInvalidException;
 import com.woolf.project.user.exception.UserAlreadyExistException;
+import com.woolf.project.user.exception.InvalidDataException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -42,4 +43,9 @@ public class AdvicesController {
                 HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidDataException.class)
+    ResponseEntity<ExceptionDTO> handleInvalidDataException(InvalidDataException ex){
+        return new ResponseEntity<>(new ExceptionDTO(HttpStatus.BAD_REQUEST, ex.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
 }

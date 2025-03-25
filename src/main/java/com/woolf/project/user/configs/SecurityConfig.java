@@ -15,6 +15,5 @@ public class SecurityConfig {
                 .cors(cors -> cors.disable())
                 .csrf(csrf -> csrf.disable())
                 .build();
-
     }
 }
