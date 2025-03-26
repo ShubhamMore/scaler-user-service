@@ -1,5 +1,7 @@
 package com.woolf.project.user.services;
 
+import com.woolf.project.user.dtos.ResetPasswordDTO;
+import com.woolf.project.user.dtos.SignUpRequestDTO;
 import com.woolf.project.user.exception.InvalidDataException;
 import com.woolf.project.user.exception.PasswordInvalidException;
 import com.woolf.project.user.exception.UserAlreadyExistException;
@@ -36,9 +38,27 @@ public class UserService {
         this.roleRepository = roleRepository;
     }
 
-    public User createUser(String email, String password, String name, String street,
-                           String city, String state, String zip, String country, List<String> roles) throws UserAlreadyExistException, PasswordInvalidException, InvalidDataException {
+    public User createUser(SignUpRequestDTO signUpRequestDTO) throws UserAlreadyExistException, PasswordInvalidException, InvalidDataException {
 
+        String email = signUpRequestDTO.getEmail();
+
+        String password = signUpRequestDTO.getPassword();
+        String name = signUpRequestDTO.getName();
+        String street = signUpRequestDTO.getStreet();
+        String city  = signUpRequestDTO.getCity();
+        String state = signUpRequestDTO.getState();
+        String zip = signUpRequestDTO.getZipcode();
+        String country = signUpRequestDTO.getCountry();
+        List<String> roles = signUpRequestDTO.getRoles();
+        String resetPasswordQuestion = signUpRequestDTO.getResetPasswordQuestion();
+        String resetPasswordAnswer = signUpRequestDTO.getResetPasswordAnswer();
+
+        if(email == null || password == null || name == null || street == null || city == null || state == null
+                || zip == null || country == null || roles == null || resetPasswordQuestion == null
+                || resetPasswordAnswer == null)
+        {
+            throw new InvalidDataException("Invalid data");
+        }
 
         if(!isValidPassword(password))
         {
@@ -122,5 +142,41 @@ public class UserService {
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
+
+
+    public User resetPassword(ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
+        Optional<User> optionalUser = userRepository.findByEmail(resetPasswordDTO.getEmail());
+        if(optionalUser.isEmpty())
+        {
+            throw new UsernameNotFoundException(resetPasswordDTO.getEmail() + " user doesn't exist.");
+        }
+        User user = optionalUser.get();
+        String actualResetPasswordQuestion = user.getResetPasswordQuestion();
+        String actualResetPasswordAnswer = user.getResetPasswordAnswer();
+
+        if(!resetPasswordDTO.getResetPasswordQuestion().equalsIgnoreCase(actualResetPasswordQuestion))
+        {
+            throw new InvalidDataException("Question for Reset Password does not match.");
+        }
+
+        if(!resetPasswordDTO.getResetPasswordAnswer().equalsIgnoreCase(actualResetPasswordAnswer))
+        {
+            throw new InvalidDataException("Answer for Reset Password does not match.");
+        }
+
+        String newEncodedPassword = bcryptpasswordencoder.encode(resetPasswordDTO.getNewPassword());
+        user.setHashedPassword(newEncodedPassword);
+        return userRepository.save(user);
+    }
+
+    public String getResetPasswordQuestion(String email) throws InvalidDataException {
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty()){
+            throw new UsernameNotFoundException( email + " user doesn't exist.");
+        }
+        return user.get().getResetPasswordQuestion();
+    }
+
+
 
 }

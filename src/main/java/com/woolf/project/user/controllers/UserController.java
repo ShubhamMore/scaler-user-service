@@ -4,6 +4,7 @@ import com.woolf.project.user.dtos.LoginRequestDTO;
 import com.woolf.project.user.dtos.LoginResponseDTO;
 import com.woolf.project.user.dtos.SignUpRequestDTO;
 import com.woolf.project.user.dtos.UserDTO;
+import com.woolf.project.user.dtos.ResetPasswordDTO;
 import com.woolf.project.user.exception.PasswordInvalidException;
 import com.woolf.project.user.exception.UserAlreadyExistException;
 import com.woolf.project.user.exception.InvalidDataException;
@@ -13,7 +14,13 @@ import com.woolf.project.user.services.TokenService;
 import com.woolf.project.user.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -32,13 +39,12 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDTO> signup(@RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException,PasswordInvalidException, InvalidDataException {
-        User user = userService.createUser(requestDTO.getEmail(),
-                requestDTO.getPassword(), requestDTO.getName(), requestDTO.getStreet(), requestDTO.getCity(),
-                requestDTO.getState(), requestDTO.getZipcode(), requestDTO.getCountry(), requestDTO.getRoles());
+    public ResponseEntity<UserDTO> signup(@RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException, PasswordInvalidException, InvalidDataException {
+        User user = userService.createUser(requestDTO);
 
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.CREATED);
     }
+
 
     @GetMapping("/getAllUsers")
     @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')") //This will enable role based access
@@ -53,7 +59,37 @@ public class UserController {
 
     @GetMapping("/getUser/{email}")
     public ResponseEntity<UserDTO> getUsersByEmail(@PathVariable String email) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof JwtAuthenticationToken) {
+            // Extract the JWT token
+            Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
+            String username = jwt.getClaim("sub");  // username is email
+            if (!email.equalsIgnoreCase(username)) { // Case-insensitive check
+                throw new AccessDeniedException("You cannot access another user's data.");
+            }
+        } else {
+            throw new BadCredentialsException("Authentication is not valid.");
+        }
+
         User user = userService.getUserByEmail(email);
+
+        return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
+    }
+
+    @GetMapping("/getResetPasswordQuestion/{email}")
+    public ResponseEntity<String> getResetPasswordQuestion(@PathVariable String email) throws InvalidDataException {
+        String question = userService.getResetPasswordQuestion(email);
+        String jsonResponse = "{\"resetPasswordQuestion\":\""+question+"\"}";
+        return new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+    }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<UserDTO> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
+        if(resetPasswordDTO.getEmail() == null || resetPasswordDTO.getResetPasswordQuestion() == null
+                || resetPasswordDTO.getResetPasswordAnswer() == null || resetPasswordDTO.getNewPassword() == null) {
+            throw new InvalidDataException("Invalid Request Body.");
+        }
+        User user = userService.resetPassword(resetPasswordDTO);
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
     }
 

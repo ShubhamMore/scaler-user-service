@@ -6,6 +6,7 @@ import com.woolf.project.user.exception.UserAlreadyExistException;
 import com.woolf.project.user.exception.InvalidDataException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -47,5 +48,11 @@ public class AdvicesController {
     ResponseEntity<ExceptionDTO> handleInvalidDataException(InvalidDataException ex){
         return new ResponseEntity<>(new ExceptionDTO(HttpStatus.BAD_REQUEST, ex.getMessage()),
                 HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<ExceptionDTO> handleRuntimeException(AccessDeniedException ex){
+        ExceptionDTO exceptionDto = new ExceptionDTO(HttpStatus.FORBIDDEN, ex.getMessage());
+        return new ResponseEntity<>(exceptionDto, HttpStatus.FORBIDDEN);
     }
 }

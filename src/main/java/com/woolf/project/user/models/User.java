@@ -25,4 +25,7 @@ public class User extends BaseModel {
 
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Role> roles;
+
+    private String resetPasswordQuestion;
+    private String resetPasswordAnswer;
 }
