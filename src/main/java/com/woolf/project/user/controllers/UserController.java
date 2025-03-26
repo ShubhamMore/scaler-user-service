@@ -13,7 +13,11 @@ import com.woolf.project.user.services.TokenService;
 import com.woolf.project.user.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -34,6 +38,29 @@ public class UserController {
                 requestDTO.getState(), requestDTO.getZipcode(), requestDTO.getCountry(), requestDTO.getRoles());
 
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/getAllUsers")
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')") //This will enable role based access
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<User> userList = userService.getAllUser();
+        List<UserDTO> userDtoList = new ArrayList<>();
+        for (User user : userList) {
+            userDtoList.add(UserDTO.fromUser(user));
+        }
+        return new ResponseEntity<>(userDtoList, HttpStatus.OK);
+    }
+
+    @GetMapping("/getUser/{email}")
+    public ResponseEntity<UserDTO> getUsersByEmail(@PathVariable String email) {
+        User user = userService.getUserByEmail(email);
+        return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
+    }
+
+    @GetMapping("/getUser/{id}")
+    public ResponseEntity<UserDTO> getAllUsers(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
     }
 
     @PostMapping("/login")
