@@ -74,12 +74,11 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain resourceAccessSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/users/**")
+        http.securityMatcher("/users/**")
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/users/signup", "users/resetPassword", "users/getResetPasswordQuestion/**").permitAll() // Public endpoints
-                                .requestMatchers("/users/getUser/**").authenticated() // Require authentication for this endpoint
-                        //.anyRequest().authenticated()
+                                .requestMatchers("/users/getUser/**", "/users/addRole/**", "/users/removeRole/**").authenticated() // Require authentication for this endpoint
+                        // .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
@@ -91,7 +90,6 @@ public class SecurityConfig {
                 );
         //.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
-
         return http.build();
     }
 
@@ -99,10 +97,7 @@ public class SecurityConfig {
     @Order(3)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
             throws Exception {
-        http
-                .authorizeHttpRequests((authorize) -> authorize
-                        .anyRequest().permitAll()
-                )
+                http.authorizeHttpRequests((authorize) -> authorize.anyRequest().permitAll())
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
                 .formLogin(Customizer.withDefaults());

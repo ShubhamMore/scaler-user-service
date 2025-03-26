@@ -45,7 +45,7 @@ public class UserService {
         String password = signUpRequestDTO.getPassword();
         String name = signUpRequestDTO.getName();
         String street = signUpRequestDTO.getStreet();
-        String city  = signUpRequestDTO.getCity();
+        String city = signUpRequestDTO.getCity();
         String state = signUpRequestDTO.getState();
         String zip = signUpRequestDTO.getZipcode();
         String country = signUpRequestDTO.getCountry();
@@ -55,38 +55,29 @@ public class UserService {
 
         if(email == null || password == null || name == null || street == null || city == null || state == null
                 || zip == null || country == null || roles == null || resetPasswordQuestion == null
-                || resetPasswordAnswer == null)
-        {
+                || resetPasswordAnswer == null) {
             throw new InvalidDataException("Invalid data");
         }
 
-        if(!isValidPassword(password))
-        {
+        if(!isValidPassword(password)) {
             throw new PasswordInvalidException("Invalid Password. Password should be at least 8 characters long " +
                     "and should have at least one digit, one uppercase letter, " +
                     "one lowercase letter and one special character");
         }
 
         List<Role> roleList = new ArrayList<>();
-        if(!roles.isEmpty())
-        {
-            for(String role : roles)
-            {
+        if(!roles.isEmpty()) {
+            for(String role : roles) {
                 Optional<Role> roleOptional = roleRepository.findByName(role);
-                if(roleOptional.isPresent())
-                {
+                if(roleOptional.isPresent()) {
                     roleList.add(roleOptional.get());
-                }
-                else
-                {
+                } else {
                     Role newRole = new Role();
                     newRole.setName(role);
                     roleList.add(roleRepository.save(newRole));
                 }
             }
-        }
-        else
-        {
+        } else {
             throw new InvalidDataException("Roles is mandatory while creating user");
         }
 
@@ -112,25 +103,23 @@ public class UserService {
     }
 
 
-    public User getUserByEmail(String email)  {
+    public User getUserByEmail(String email) {
         Optional<User> user = userRepository.findByEmail(email);
-        if(user.isEmpty())
-        {
+        if(user.isEmpty()) {
             throw new UsernameNotFoundException("User by email: " + email + " doesn't exist.");
         }
         return user.get();
     }
 
-    public User getUserById(Long id)  {
+    public User getUserById(Long id) {
         Optional<User> user = userRepository.findById(id);
-        if(user.isEmpty())
-        {
+        if(user.isEmpty()) {
             throw new UsernameNotFoundException("User by Id: " + id + " doesn't exist.");
         }
         return user.get();
     }
 
-    public List<User> getAllUser()  {
+    public List<User> getAllUser() {
         return userRepository.findAll();
     }
 
@@ -143,24 +132,20 @@ public class UserService {
         return matcher.matches();
     }
 
-
     public User resetPassword(ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
         Optional<User> optionalUser = userRepository.findByEmail(resetPasswordDTO.getEmail());
-        if(optionalUser.isEmpty())
-        {
+        if(optionalUser.isEmpty()) {
             throw new UsernameNotFoundException(resetPasswordDTO.getEmail() + " user doesn't exist.");
         }
         User user = optionalUser.get();
         String actualResetPasswordQuestion = user.getResetPasswordQuestion();
         String actualResetPasswordAnswer = user.getResetPasswordAnswer();
 
-        if(!resetPasswordDTO.getResetPasswordQuestion().equalsIgnoreCase(actualResetPasswordQuestion))
-        {
+        if(!resetPasswordDTO.getResetPasswordQuestion().equalsIgnoreCase(actualResetPasswordQuestion)) {
             throw new InvalidDataException("Question for Reset Password does not match.");
         }
 
-        if(!resetPasswordDTO.getResetPasswordAnswer().equalsIgnoreCase(actualResetPasswordAnswer))
-        {
+        if(!resetPasswordDTO.getResetPasswordAnswer().equalsIgnoreCase(actualResetPasswordAnswer)) {
             throw new InvalidDataException("Answer for Reset Password does not match.");
         }
 
@@ -171,12 +156,44 @@ public class UserService {
 
     public String getResetPasswordQuestion(String email) throws InvalidDataException {
         Optional<User> user = userRepository.findByEmail(email);
-        if(user.isEmpty()){
+        if(user.isEmpty()) {
             throw new UsernameNotFoundException( email + " user doesn't exist.");
         }
         return user.get().getResetPasswordQuestion();
     }
 
+    public User addRole(Long id, String roleName)
+    {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if(optionalUser.isEmpty()) {
+            throw new UsernameNotFoundException("User by id: " + id + " doesn't exist.");
+        }
+        User user = optionalUser.get();
 
+        Role addRole;
+        if(roleRepository.findByName(roleName).isPresent()) {
+            addRole = roleRepository.findByName(roleName).get();
+        } else {
+            addRole = new Role();
+            addRole.setName(roleName);
+            roleRepository.save(addRole);
+        }
+        user.getRoles().add(addRole);
+        return userRepository.save(user);
+    }
 
+    public User removeRole(Long id, String roleName) throws InvalidDataException {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if(optionalUser.isEmpty()) {
+            throw new UsernameNotFoundException("User doesn't exist.");
+        }
+        User user = optionalUser.get();
+
+        Optional<Role> optionalRole = roleRepository.findByName(roleName);
+        if(optionalRole.isEmpty()) {
+            throw new InvalidDataException(roleName + " Role does not exist" );
+        }
+        user.getRoles().remove(optionalRole.get());
+        return userRepository.save(user);
+    }
 }
