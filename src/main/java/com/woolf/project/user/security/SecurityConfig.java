@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.woolf.project.user.security.models.CustomUserDetails;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -77,7 +78,7 @@ public class SecurityConfig {
         http.securityMatcher("/users/**")
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/users/signup", "users/resetPassword", "users/getResetPasswordQuestion/**").permitAll() // Public endpoints
-                                .requestMatchers("/users/getUser/**", "/users/addRole/**", "/users/removeRole/**").authenticated() // Require authentication for this endpoint
+                                .requestMatchers("/users/getUser/**", "/users/addRole/**", "/users/removeRole/**", "/users/updateUser/**", "/users/deleteUser/**").authenticated() // Require authentication for this endpoint
                         // .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
