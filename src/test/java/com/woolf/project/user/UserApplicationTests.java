@@ -9,6 +9,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @SpringBootTest
@@ -17,13 +18,13 @@ class UserApplicationTests {
 	@Autowired
 	private RegisteredClientRepository registeredClientRepository;
 
+
 	@Test
 	void contextLoads() {
 	}
 
-	//@Test
-	void addRegisterSampleClient()
-	{
+	//  @Test
+	void addRegisterSampleClient() {
 		RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
 				.clientId("scaler")
 				.clientSecret("$2a$12$qI9/zPEx2tITCJwGI6ni7u.9VEUxcerU2xi3YU7vsACcwomy4A9JK")

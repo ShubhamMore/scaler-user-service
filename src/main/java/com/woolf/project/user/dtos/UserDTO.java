@@ -1,5 +1,6 @@
 package com.woolf.project.user.dtos;
 
+import com.woolf.project.user.enums.Roles;
 import com.woolf.project.user.models.User;
 import com.woolf.project.user.models.Role;
 
@@ -16,7 +17,7 @@ public class UserDTO {
     private String name;
     private String email;
     private String address;
-    private List<String> roles;
+    private List<Roles> roles;
 
     public static UserDTO fromUser(User user){
         UserDTO userDTO = new UserDTO();
@@ -35,7 +36,7 @@ public class UserDTO {
 
 
         if(user.getRoles() != null){
-            List<String> roles = new ArrayList<>();
+            List<Roles> roles = new ArrayList<>();
             for(Role role : user.getRoles())
             {
                 roles.add(role.getName());

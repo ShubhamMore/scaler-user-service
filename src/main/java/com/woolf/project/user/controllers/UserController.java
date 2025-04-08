@@ -1,5 +1,6 @@
 package com.woolf.project.user.controllers;
 
+import com.woolf.project.user.enums.Roles;
 import com.woolf.project.user.dtos.LoginRequestDTO;
 import com.woolf.project.user.dtos.LoginResponseDTO;
 import com.woolf.project.user.dtos.SignUpRequestDTO;
@@ -12,6 +13,7 @@ import com.woolf.project.user.models.Token;
 import com.woolf.project.user.models.User;
 import com.woolf.project.user.services.TokenService;
 import com.woolf.project.user.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,6 +26,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +43,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDTO> signup(@RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException, PasswordInvalidException, InvalidDataException {
+    public ResponseEntity<UserDTO> signup(@Valid @RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException, PasswordInvalidException, InvalidDataException {
         User user = userService.createUser(requestDTO);
 
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.CREATED);
@@ -48,14 +51,14 @@ public class UserController {
 
 
     @GetMapping("/getAllUsers")
-    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')") //This will enable role based access
+    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> userList = userService.getAllUser();
-        List<UserDTO> userDtoList = new ArrayList<>();
+        List<UserDTO> userDTOList = new ArrayList<>();
         for (User user : userList) {
-            userDtoList.add(UserDTO.fromUser(user));
+            userDTOList.add(UserDTO.fromUser(user));
         }
-        return new ResponseEntity<>(userDtoList, HttpStatus.OK);
+        return new ResponseEntity<>(userDTOList, HttpStatus.OK);
     }
 
     @GetMapping("/getUser/{email}")
@@ -78,25 +81,23 @@ public class UserController {
     }
 
     @GetMapping("/getResetPasswordQuestion/{email}")
-    public ResponseEntity<String> getResetPasswordQuestion(@PathVariable String email) throws InvalidDataException {
+    public ResponseEntity<Map> getResetPasswordQuestion(@PathVariable String email) throws InvalidDataException {
         String question = userService.getResetPasswordQuestion(email);
-        String jsonResponse = "{\"resetPasswordQuestion\":\""+question+"\"}";
-        return new ResponseEntity<>(jsonResponse, HttpStatus.OK);
+        Map<String,String> response = new HashMap<>();
+        response.put("resetPasswordQuestion",question);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/resetPassword")
-    public ResponseEntity<UserDTO> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
-        if(resetPasswordDTO.getEmail() == null || resetPasswordDTO.getResetPasswordQuestion() == null
-                || resetPasswordDTO.getResetPasswordAnswer() == null || resetPasswordDTO.getNewPassword() == null) {
-            throw new InvalidDataException("Invalid Request Body.");
-        }
+        public ResponseEntity<UserDTO> resetPassword(@RequestBody @Valid ResetPasswordDTO resetPasswordDTO) throws InvalidDataException {
+
         User user = userService.resetPassword(resetPasswordDTO);
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
     }
 
     @GetMapping("/getUser/{id}")
     public ResponseEntity<UserDTO> getAllUsers(@PathVariable Long id) {
-        User user = userService.getUserById(id);
+        User user = userService.getUserById (id);
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
     }
 
@@ -114,7 +115,7 @@ public class UserController {
 
 
     @PatchMapping("/addRole/{id}")
-    public ResponseEntity<UserDTO> addRole(@PathVariable Long id, @RequestParam String roleName)
+    public ResponseEntity<UserDTO> addRole(@PathVariable Long id, @RequestParam Roles roleName)
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
@@ -134,7 +135,7 @@ public class UserController {
     }
 
     @PatchMapping("/removeRole/{id}")
-    public ResponseEntity<UserDTO> removeRole(@PathVariable Long id, @RequestParam String roleName) throws InvalidDataException {
+    public ResponseEntity<UserDTO> removeRole(@PathVariable Long id, @RequestParam Roles roleName) throws InvalidDataException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             // Extract the JWT token
