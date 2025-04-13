@@ -42,7 +42,7 @@ public class UserController {
         this.tokenService = tokenService;
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/signUp")
     public ResponseEntity<UserDTO> signup(@Valid @RequestBody SignUpRequestDTO requestDTO) throws UserAlreadyExistException, PasswordInvalidException, InvalidDataException {
         User user = userService.createUser(requestDTO);
 
@@ -95,11 +95,11 @@ public class UserController {
         return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
     }
 
-    @GetMapping("/getUser/{id}")
-    public ResponseEntity<UserDTO> getAllUsers(@PathVariable Long id) {
-        User user = userService.getUserById (id);
-        return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
-    }
+//    @GetMapping("/getUser/{id}")
+//    public ResponseEntity<UserDTO> getAllUsers(@PathVariable Long id) {
+//        User user = userService.getUserById (id);
+//        return new ResponseEntity<>(UserDTO.fromUser(user), HttpStatus.OK);
+//    }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO requestDTO) {
@@ -115,8 +115,7 @@ public class UserController {
 
 
     @PatchMapping("/addRole/{id}")
-    public ResponseEntity<UserDTO> addRole(@PathVariable Long id, @RequestParam Roles roleName)
-    {
+    public ResponseEntity<UserDTO> addRole(@PathVariable Long id, @RequestParam Roles roleName) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             // Extract the JWT token
@@ -155,8 +154,7 @@ public class UserController {
 
 
     @PatchMapping("/updateUser/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates)
-    {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication instanceof JwtAuthenticationToken) {
             // Extract the JWT token

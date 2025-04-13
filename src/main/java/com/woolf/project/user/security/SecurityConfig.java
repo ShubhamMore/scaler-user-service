@@ -77,7 +77,7 @@ public class SecurityConfig {
     public SecurityFilterChain resourceAccessSecurityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/users/**")
                 .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers("/users/signup", "users/resetPassword", "users/getResetPasswordQuestion/**").permitAll() // Public endpoints
+                                .requestMatchers("/users/signUp", "users/resetPassword", "users/getResetPasswordQuestion/**").permitAll() // Public endpoints
                                 .requestMatchers("/users/getUser/**", "/users/addRole/**", "/users/removeRole/**", "/users/updateUser/**", "/users/deleteUser/**").authenticated() // Require authentication for this endpoint
                         // .anyRequest().authenticated()
                 )

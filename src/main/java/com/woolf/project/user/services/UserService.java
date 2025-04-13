@@ -54,7 +54,8 @@ public class UserService {
         List<Roles> roles = signUpRequestDTO.getRoles();
 
 
-        if(!isValidPassword(password)) {
+        if(!isValidPassword(password))
+        {
             throw new PasswordInvalidException("Invalid password. It must be at least 8 characters long and include at least one digit," +
                     " one uppercase letter, one lowercase letter," +
                     " and one special character.");
@@ -73,8 +74,7 @@ public class UserService {
                     roleList.add(roleRepository.save(newRole));
                 }
             }
-        }
-        else {
+        } else {
             throw new InvalidDataException("Roles is mandatory while creating user");
         }
 
@@ -104,20 +104,13 @@ public class UserService {
     public User getUserByEmail(String email)  {
         Optional<User> user = userRepository.findByEmail(email);
         if(user.isEmpty()) {
-            throw new UsernameNotFoundException("Requested user email doesn't exist.");
+            throw new UsernameNotFoundException("User by email " + email + " doesn't exist.");
         }
         return user.get();
     }
 
-    public User getUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        if(user.isEmpty()) {
-            throw new UsernameNotFoundException("Requested User Id doesn't exist.");
-        }
-        return user.get();
-    }
 
-    public List<User> getAllUser() {
+    public List<User> getAllUser()  {
         return userRepository.findAll();
     }
 
@@ -151,11 +144,10 @@ public class UserService {
         return user.get().getResetPasswordQuestion();
     }
 
-    public User addRole(Long id, Roles roleName)
-    {
+    public User addRole(Long id, Roles roleName) {
         Optional<User> existingUser = userRepository.findById(id);
         if(existingUser.isEmpty()) {
-            throw new UsernameNotFoundException("Invalid UserId " + id );
+            throw new UsernameNotFoundException("Invalid User");
         }
         User user = existingUser.get();
 
@@ -174,13 +166,13 @@ public class UserService {
     public User removeRole(Long id, Roles roleName) throws InvalidDataException {
         Optional<User> existingUser = userRepository.findById(id);
         if(existingUser.isEmpty()) {
-            throw new UsernameNotFoundException("Invalid UserId " + id );
+            throw new UsernameNotFoundException("Invalid User");
         }
         User user = existingUser.get();
 
         Optional<Role> optionalRole = roleRepository.findByName(roleName);
         if(optionalRole.isEmpty()) {
-            throw new InvalidDataException("Role " +roleName+" does not exist" );
+            throw new InvalidDataException("Role " +roleName+" doesn't exist" );
         }
         user.getRoles().remove(optionalRole.get());
         return userRepository.save(user);
@@ -189,7 +181,7 @@ public class UserService {
     public User updateUser(Long id, Map<String, Object> updates) {
         Optional<User> existingUser = userRepository.findById(id);
         if(existingUser.isEmpty()) {
-            throw new UsernameNotFoundException("Invalid UserId " + id );
+            throw new UsernameNotFoundException("Invalid User");
         }
 
         User user = existingUser.get();
@@ -230,10 +222,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void deleteUser(String email) {
+    public void deleteUser(String email){
         Optional<User> existingUser = userRepository.findByEmail(email);
-        if(existingUser.isEmpty()) {
-            throw new UsernameNotFoundException("User by email: " + email + " doesn't exist.");
+        if(existingUser.isEmpty()){
+            throw new UsernameNotFoundException("User by email " + email + " doesn't exist.");
         }
         User user = existingUser.get();
         user.getRoles().removeAll(user.getRoles());
