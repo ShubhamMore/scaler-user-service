@@ -54,8 +54,7 @@ public class UserService {
         List<Roles> roles = signUpRequestDTO.getRoles();
 
 
-        if(!isValidPassword(password))
-        {
+        if(!isValidPassword(password)) {
             throw new PasswordInvalidException("Invalid password. It must be at least 8 characters long and include at least one digit," +
                     " one uppercase letter, one lowercase letter," +
                     " and one special character.");
@@ -172,7 +171,7 @@ public class UserService {
 
         Optional<Role> optionalRole = roleRepository.findByName(roleName);
         if(optionalRole.isEmpty()) {
-            throw new InvalidDataException("Role " +roleName+" doesn't exist" );
+            throw new InvalidDataException("Role " + roleName + " does not exist" );
         }
         user.getRoles().remove(optionalRole.get());
         return userRepository.save(user);
@@ -224,7 +223,7 @@ public class UserService {
 
     public void deleteUser(String email){
         Optional<User> existingUser = userRepository.findByEmail(email);
-        if(existingUser.isEmpty()){
+        if(existingUser.isEmpty()) {
             throw new UsernameNotFoundException("User by email " + email + " doesn't exist.");
         }
         User user = existingUser.get();

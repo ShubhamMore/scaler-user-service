@@ -60,8 +60,6 @@ public class SecurityConfig {
                         authorize
                                 .anyRequest().authenticated()
                 )
-                // Redirect to the login page when not authenticated from the
-                // authorization endpoint
                 .exceptionHandling((exceptions) -> exceptions
                         .defaultAuthenticationEntryPointFor(
                                 new LoginUrlAuthenticationEntryPoint("/login"),
@@ -79,17 +77,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/users/signUp", "users/resetPassword", "users/getResetPasswordQuestion/**").permitAll() // Public endpoints
                                 .requestMatchers("/users/getUser/**", "/users/addRole/**", "/users/removeRole/**", "/users/updateUser/**", "/users/deleteUser/**").authenticated() // Require authentication for this endpoint
-                        // .anyRequest().authenticated()
                 )
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
-                //we can  use this as well with custom jwtAuthenticationConverter
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         )
                 );
-        //.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
         return http.build();
     }
@@ -141,7 +136,6 @@ public class SecurityConfig {
         return AuthorizationServerSettings.builder().build();
     }
 
-    //This implementation is to customize jwt to add extra fields
     @Bean
     public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
         return (context) -> {
@@ -152,6 +146,9 @@ public class SecurityConfig {
                             .map(c -> c.replaceFirst("^ROLE_", ""))
                             .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
                     claims.put("roles", roles);
+                    claims.put("userId", ((CustomUserDetails)context.getPrincipal().getPrincipal()).getUserId());
+                    claims.put("name", ((CustomUserDetails)context.getPrincipal().getPrincipal()).getName());
+                    claims.put("address", ((CustomUserDetails)context.getPrincipal().getPrincipal()).getAddress());
                 });
             }
         };

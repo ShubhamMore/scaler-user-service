@@ -1,9 +1,8 @@
 package com.woolf.project.user.dtos;
 
 import com.woolf.project.user.enums.Roles;
-import com.woolf.project.user.models.User;
 import com.woolf.project.user.models.Role;
-
+import com.woolf.project.user.models.User;
 import lombok.Getter;
 import lombok.Setter;
 

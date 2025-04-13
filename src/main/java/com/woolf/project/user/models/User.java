@@ -1,15 +1,10 @@
 package com.woolf.project.user.models;
 
 import jakarta.persistence.*;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
 
 @Getter
 @Setter
